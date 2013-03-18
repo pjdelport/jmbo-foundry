@@ -1,6 +1,6 @@
 import re
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseServerError
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.utils import timezone
@@ -37,7 +37,11 @@ class AgeGateway:
     Must run after AuthenticationMiddleware."""
 
     def process_response(self, request, response):
-        
+
+        # Avoid interfering with server errors.
+        if isinstance(response, HttpResponseServerError):
+            return response
+
         # Ignore ajax
         if request.is_ajax():
             return response
